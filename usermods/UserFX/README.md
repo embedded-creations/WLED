@@ -4,7 +4,9 @@ There are two "sets" of UserFX effects you can add to WLED (it's easy to add mor
 
 ## To include the effects in set UserFX1
 
-Define `USERFX1_H` with the pathname of to `UserFX1.h`, and `USERFX1_CPP_H` with the pathname of to `UserFX1.cpp.h`.  Add to myconfig.h:
+Define `USERFX1_H` with the pathname of to `UserFX1.h`, and `USERFX1_CPP_H` with the pathname of to `UserFX1.cpp.h`.
+
+Add to myconfig.h:
 
 ```
 #define USERFX1_H       "../usermods/UserFX/UserFX1.h"
@@ -13,8 +15,8 @@ Define `USERFX1_H` with the pathname of to `UserFX1.h`, and `USERFX1_CPP_H` with
 or Add to PlatformIO Config:
 
 ```
-'-D USERFX1_H="../usermods/UserFX/FX_user.h"'
-'-D USERFX1_CPP_H="../usermods/UserFX/FX_user.cpp.h"'
+'-D USERFX1_H="../usermods/UserFX/UserFX1.h"'
+'-D USERFX1_CPP_H="../usermods/UserFX/UserFX1.cpp.h"'
 ```
 
 ## Add custom effect to a set
