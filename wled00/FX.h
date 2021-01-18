@@ -24,7 +24,7 @@
   Modified for WLED
 */
 
-// wled.h needs to be included at top before #ifndef WS2812FX_h check (as wled.h includes FX.h), so that the contents of my_config.h is available to FX.h
+// wled.h contains my_config.h, and needs to be included at top of FX.h, before #ifndef WS2812FX_h check (as wled.h includes FX.h), so that the contents of FX.h is included into wled.h
 #include "wled.h"
 
 #ifndef WS2812FX_h
