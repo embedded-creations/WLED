@@ -17,6 +17,9 @@
 #ifdef USERMOD_BUZZER
 #include "../usermods/buzzer/usermod_v2_buzzer.h"
 #endif
+#ifdef USERMOD_SENSORSTOMQTT
+#include "usermod_v2_SensorsToMqtt.h"
+#endif
 
 #include "sound_reactive.h"
 
@@ -34,6 +37,10 @@ void registerUsermods()
   //usermods.add(new UsermodRenameMe());
   #ifdef USERMOD_BUZZER
   usermods.add(new BuzzerUsermod());
+  #endif
+
+  #ifdef USERMOD_SENSORSTOMQTT
+  usermods.add(new UserMod_SensorsToMQTT());
   #endif
 
   usermods.add(new SoundreactiveUsermod());
