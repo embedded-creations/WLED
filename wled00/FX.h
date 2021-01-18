@@ -36,6 +36,10 @@
   #include "NpbWrapper.h"
 #endif
 
+// Hardcode the Soundreactive fork to include custom effects in UserFX2 (leaving UserFX1 free for other effects)
+#define USERFX2_H       "../usermods/UserFX_Soundreactive/UserFX2_Soundreactive.h"
+#define USERFX2_CPP_H   "../usermods/UserFX_Soundreactive/UserFX2_Soundreactive.cpp.h"
+
 // UserFX: to add user-defined effects to WLED
 #ifdef USERFX1_H
     #include USERFX1_H
@@ -279,40 +283,6 @@
 #define FX_MODE_BLENDS                 115
 #define FX_MODE_TV_SIMULATOR           116
 #define FX_MODE_DYNAMIC_SMOOTH         117
-#define FX_MODE_PIXELS                 118
-#define FX_MODE_PIXELWAVE              119
-#define FX_MODE_JUGGLES                120
-#define FX_MODE_MATRIPIX               121
-#define FX_MODE_GRAVIMETER             122
-#define FX_MODE_PLASMOID               123
-#define FX_MODE_PUDDLES                124
-#define FX_MODE_MIDNOISE               125
-#define FX_MODE_NOISEMETER             126
-#define FX_MODE_FREQWAVE               127
-#define FX_MODE_FREQMATRIX             128
-#define FX_MODE_2DGEQ                  129
-#define FX_MODE_WATERFALL              130
-#define FX_MODE_FREQPIXELS             131
-#define FX_MODE_BINMAP                 132
-#define FX_MODE_NOISEFIRE              133
-#define FX_MODE_PUDDLEPEAK             134
-#define FX_MODE_NOISEMOVE              135
-#define FX_MODE_2DPLASMA               136
-#define FX_MODE_PERLINMOVE             137
-#define FX_MODE_RIPPLEPEAK             138
-#define FX_MODE_2DFIRENOISE            139
-#define FX_MODE_2DSQUAREDSWIRL         140
-#define FX_MODE_2DFIRE2012             141
-#define FX_MODE_2DDNA                  142
-#define FX_MODE_2DMATRIX               143
-#define FX_MODE_2DMEATBALLS            144
-#define FX_MODE_FREQMAP                145
-#define FX_MODE_GRAVCENTER             146
-#define FX_MODE_GRAVCENTRIC            147
-#define FX_MODE_GRAVFREQ               148
-#define FX_MODE_DJLIGHT                149
-#define FX_MODE_2DFUNKYPLANK           150
-#define FX_MODE_2DCENTERBARS           151
 
 #define MODE_COUNT (BUILTIN_MODE_COUNT + USERFX_MODE_COUNT)
 
@@ -656,40 +626,6 @@ class WS2812FX {
       _mode[FX_MODE_BLENDS]                  = &WS2812FX::mode_blends;
       _mode[FX_MODE_TV_SIMULATOR]            = &WS2812FX::mode_tv_simulator;
       _mode[FX_MODE_DYNAMIC_SMOOTH]          = &WS2812FX::mode_dynamic_smooth;
-      _mode[FX_MODE_PIXELS]                  = &WS2812FX::mode_pixels;
-      _mode[FX_MODE_PIXELWAVE]               = &WS2812FX::mode_pixelwave;
-      _mode[FX_MODE_JUGGLES]                 = &WS2812FX::mode_juggles;
-      _mode[FX_MODE_MATRIPIX]                = &WS2812FX::mode_matripix;
-      _mode[FX_MODE_GRAVIMETER]              = &WS2812FX::mode_gravimeter;
-      _mode[FX_MODE_PLASMOID]                = &WS2812FX::mode_plasmoid;
-      _mode[FX_MODE_PUDDLES]                 = &WS2812FX::mode_puddles;
-      _mode[FX_MODE_MIDNOISE]                = &WS2812FX::mode_midnoise;
-      _mode[FX_MODE_NOISEMETER]              = &WS2812FX::mode_noisemeter;
-      _mode[FX_MODE_FREQWAVE]                = &WS2812FX::mode_freqwave;
-      _mode[FX_MODE_FREQMATRIX]              = &WS2812FX::mode_freqmatrix;
-      _mode[FX_MODE_2DGEQ]                   = &WS2812FX::mode_2DGEQ;
-      _mode[FX_MODE_WATERFALL]               = &WS2812FX::mode_waterfall;
-      _mode[FX_MODE_FREQPIXELS]              = &WS2812FX::mode_freqpixels;
-      _mode[FX_MODE_BINMAP]                  = &WS2812FX::mode_binmap;
-      _mode[FX_MODE_NOISEFIRE]               = &WS2812FX::mode_noisefire;
-      _mode[FX_MODE_PUDDLEPEAK]              = &WS2812FX::mode_puddlepeak;
-      _mode[FX_MODE_NOISEMOVE]               = &WS2812FX::mode_noisemove;
-      _mode[FX_MODE_2DPLASMA]                = &WS2812FX::mode_2Dplasma;
-      _mode[FX_MODE_PERLINMOVE]              = &WS2812FX::mode_perlinmove;
-      _mode[FX_MODE_RIPPLEPEAK]              = &WS2812FX::mode_ripplepeak;
-      _mode[FX_MODE_2DFIRENOISE]             = &WS2812FX::mode_2Dfirenoise;
-      _mode[FX_MODE_2DSQUAREDSWIRL]          = &WS2812FX::mode_2Dsquaredswirl;
-      _mode[FX_MODE_2DFIRE2012]              = &WS2812FX::mode_2Dfire2012;
-      _mode[FX_MODE_2DDNA]                   = &WS2812FX::mode_2Ddna;
-      _mode[FX_MODE_2DMATRIX]                = &WS2812FX::mode_2Dmatrix;
-      _mode[FX_MODE_2DMEATBALLS]             = &WS2812FX::mode_2Dmeatballs;
-      _mode[FX_MODE_FREQMAP]                 = &WS2812FX::mode_freqmap;
-      _mode[FX_MODE_GRAVCENTER]              = &WS2812FX::mode_gravcenter;
-      _mode[FX_MODE_GRAVCENTRIC]             = &WS2812FX::mode_gravcentric;
-      _mode[FX_MODE_GRAVFREQ]                = &WS2812FX::mode_gravfreq;
-      _mode[FX_MODE_DJLIGHT]                 = &WS2812FX::mode_DJLight;
-      _mode[FX_MODE_2DFUNKYPLANK]            = &WS2812FX::mode_2DFunkyPlank;
-      _mode[FX_MODE_2DCENTERBARS]            = &WS2812FX::mode_2DCenterBars;
       USERFX_ADD_MODES_TO_MAP();
 
       _brightness = DEFAULT_BRIGHTNESS;
@@ -920,41 +856,7 @@ class WS2812FX {
       mode_candy_cane(void),
       mode_blends(void),
       mode_tv_simulator(void),
-      mode_dynamic_smooth(void),
-      mode_pixels(void),
-      mode_pixelwave(void),
-      mode_juggles(void),
-      mode_matripix(void),
-      mode_gravimeter(void),
-      mode_plasmoid(void),
-      mode_puddles(void),
-      mode_midnoise(void),
-      mode_noisemeter(void),
-      mode_freqwave(void),
-      mode_freqmatrix(void),
-      mode_2DGEQ(void),
-      mode_waterfall(void),
-      mode_freqpixels(void),
-      mode_binmap(void),
-      mode_noisefire(void),
-      mode_puddlepeak(void),
-      mode_noisemove(void),
-      mode_2Dplasma(void),
-      mode_perlinmove(void),
-      mode_ripplepeak(void),
-      mode_2Dfirenoise(void),
-      mode_2Dsquaredswirl(void),
-      mode_2Dfire2012(void),
-      mode_2Ddna(void),
-      mode_2Dmatrix(void),
-      mode_2Dmeatballs(void),
-      mode_freqmap(void),
-      mode_gravcenter(void),
-      mode_gravcentric(void),
-      mode_gravfreq(void),
-      mode_DJLight(void),
-      mode_2DFunkyPlank(void),
-      mode_2DCenterBars(void)
+      mode_dynamic_smooth(void)
       USERFX_MODES_LIST();
 
   private:
@@ -1043,7 +945,7 @@ class WS2812FX {
 };
 
 // Ideally this would be 10 names per line, but a compiler bug seems to be preventing using a raw string literal containing newlines with a preprocessor macro https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55971
-#define json_mode_names_builtin_beginning R"=====(["Solid","Blink","Breathe","Wipe","Wipe Random","Random Colors","Sweep","Dynamic","Colorloop","Rainbow","Scan","Scan Dual","Fade","Theater","Theater Rainbow","Running","Saw","Twinkle","Dissolve","Dissolve Rnd","Sparkle","Sparkle Dark","Sparkle+","Strobe","Strobe Rainbow","Strobe Mega","Blink Rainbow","Android","Chase","Chase Random","Chase Rainbow","Chase Flash","Chase Flash Rnd","Rainbow Runner","Colorful","Traffic Light","Sweep Random","Running 2","Aurora","Stream","Scanner","Lighthouse","Fireworks","Rain","Merry Christmas","Fire Flicker","Gradient","Loading","Police","Police All","Two Dots","Two Areas","Circus","Halloween","Tri Chase","Tri Wipe","Tri Fade","Lightning","ICU","Multi Comet","Scanner Dual","Stream 2","Oscillate","Pride 2015","Juggle","Palette","Fire 2012","Colorwaves","Bpm","Fill Noise","Noise 1","Noise 2","Noise 3","Noise 4","Colortwinkles","Lake","Meteor","Meteor Smooth","Railway","Ripple","Twinklefox","Twinklecat","Halloween Eyes","Solid Pattern","Solid Pattern Tri","Spots","Spots Fade","Glitter","Candle","Fireworks Starburst","Fireworks 1D","Bouncing Balls","Sinelon","Sinelon Dual","Sinelon Rainbow","Popcorn","Drip","Plasma","Percent","Ripple Rainbow","Heartbeat","Pacifica","Candle Multi","Solid Glitter","Sunrise","Phased","Phased Noise","TwinkleUp","Noise Pal","Sine","Flow","Chunchun","Dancing Shadows","Washing Machine","Candy Cane","Blends","TV Simulator","Dynamic Smooth","* Pixels","* Pixelwave","* Juggles","* Matripix","* Gravimeter","* Plasmoid","* Puddles","* Midnoise","* Noisemeter","** Freqwave","** Freqmatrix","** 2D GEQ","** Waterfall","** Freqpixels","** Binmap","* Noisefire","* Puddlepeak","** Noisemove","2D Plasma","Perlin Move","* Ripple Peak","2D FireNoise","2D Squared Swirl","2D Fire2012","2D DNA","2D Matrix","2D Meatballs","** Freqmap","* Gravcenter","* Gravcentric","** Gravfreq","** DJ Light","** 2D Funky Plank","** 2D CenterBars")====="
+#define json_mode_names_builtin_beginning R"=====(["Solid","Blink","Breathe","Wipe","Wipe Random","Random Colors","Sweep","Dynamic","Colorloop","Rainbow","Scan","Scan Dual","Fade","Theater","Theater Rainbow","Running","Saw","Twinkle","Dissolve","Dissolve Rnd","Sparkle","Sparkle Dark","Sparkle+","Strobe","Strobe Rainbow","Strobe Mega","Blink Rainbow","Android","Chase","Chase Random","Chase Rainbow","Chase Flash","Chase Flash Rnd","Rainbow Runner","Colorful","Traffic Light","Sweep Random","Running 2","Aurora","Stream","Scanner","Lighthouse","Fireworks","Rain","Merry Christmas","Fire Flicker","Gradient","Loading","Police","Police All","Two Dots","Two Areas","Circus","Halloween","Tri Chase","Tri Wipe","Tri Fade","Lightning","ICU","Multi Comet","Scanner Dual","Stream 2","Oscillate","Pride 2015","Juggle","Palette","Fire 2012","Colorwaves","Bpm","Fill Noise","Noise 1","Noise 2","Noise 3","Noise 4","Colortwinkles","Lake","Meteor","Meteor Smooth","Railway","Ripple","Twinklefox","Twinklecat","Halloween Eyes","Solid Pattern","Solid Pattern Tri","Spots","Spots Fade","Glitter","Candle","Fireworks Starburst","Fireworks 1D","Bouncing Balls","Sinelon","Sinelon Dual","Sinelon Rainbow","Popcorn","Drip","Plasma","Percent","Ripple Rainbow","Heartbeat","Pacifica","Candle Multi","Solid Glitter","Sunrise","Phased","Phased Noise","TwinkleUp","Noise Pal","Sine","Flow","Chunchun","Dancing Shadows","Washing Machine","Candy Cane","Blends","TV Simulator","Dynamic Smooth")====="
 
 #define json_mode_names_builtin_end R"=====(])====="
 
