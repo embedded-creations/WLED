@@ -36,43 +36,6 @@
   #include "NpbWrapper.h"
 #endif
 
-// UserFX: to add user-defined effects to WLED
-#ifdef USERFX1_H
-    #include USERFX1_H
-#else
-    #define USERFX1_MODE_COUNT 0
-    #define USERFX1_ADD_MODES_TO_MAP()
-    #define USERFX1_MODES_LIST()
-    #define USERFX1_JSON_MODE_NAMES
-#endif
-
-#ifdef USERFX2_H
-    #include USERFX2_H
-#else
-    #define USERFX2_MODE_COUNT 0
-    #define USERFX2_ADD_MODES_TO_MAP()
-    #define USERFX2_MODES_LIST()
-    #define USERFX2_JSON_MODE_NAMES
-#endif
-
-#define USERFX_MODE_COUNT (\
-  USERFX1_MODE_COUNT + \
-  USERFX2_MODE_COUNT + \
-  0)
-
-#define USERFX_ADD_MODES_TO_MAP() \
-    USERFX1_ADD_MODES_TO_MAP() \
-    USERFX2_ADD_MODES_TO_MAP() \
-
-#define USERFX_MODES_LIST() \
-    USERFX1_MODES_LIST() \
-    USERFX2_MODES_LIST() \
-
-#define json_mode_names_user \
-    USERFX1_JSON_MODE_NAMES \
-    USERFX2_JSON_MODE_NAMES \
-
-
 #define FASTLED_INTERNAL //remove annoying pragma messages
 #define USE_GET_MILLISECOND_TIMER
 #include "FastLED.h"
@@ -313,6 +276,43 @@
 #define FX_MODE_DJLIGHT                149
 #define FX_MODE_2DFUNKYPLANK           150
 #define FX_MODE_2DCENTERBARS           151
+
+// UserFX: to add user-defined effects to WLED - needs to included here not at the top, as it depends on BUILTIN_MODE_COUNT
+#ifdef USERFX1_H
+    #include USERFX1_H
+#else
+    #define USERFX1_MODE_COUNT 0
+    #define USERFX1_ADD_MODES_TO_MAP()
+    #define USERFX1_MODES_LIST()
+    #define USERFX1_JSON_MODE_NAMES
+#endif
+
+#ifdef USERFX2_H
+    #include USERFX2_H
+#else
+    #define USERFX2_MODE_COUNT 0
+    #define USERFX2_ADD_MODES_TO_MAP()
+    #define USERFX2_MODES_LIST()
+    #define USERFX2_JSON_MODE_NAMES
+#endif
+
+#define USERFX_MODE_COUNT (\
+  USERFX1_MODE_COUNT + \
+  USERFX2_MODE_COUNT + \
+  0)
+
+#define USERFX_ADD_MODES_TO_MAP() \
+    USERFX1_ADD_MODES_TO_MAP() \
+    USERFX2_ADD_MODES_TO_MAP() \
+
+#define USERFX_MODES_LIST() \
+    USERFX1_MODES_LIST() \
+    USERFX2_MODES_LIST() \
+
+#define json_mode_names_user \
+    USERFX1_JSON_MODE_NAMES \
+    USERFX2_JSON_MODE_NAMES \
+
 
 #define MODE_COUNT (BUILTIN_MODE_COUNT + USERFX_MODE_COUNT)
 
