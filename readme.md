@@ -8,6 +8,8 @@ More details are in the sketch (wled00/wled00.ino)
 
 This project should work with PlatformIO, but as I'm not that familiar with how to properly set up a PlatformIO project, I just removed WLED's PlatformIO files as I'm guessing they won't work as is.  If anyone wants to contribute a working PlatformIO project setup for this fork, I'd be happy to include it in the repo.
 
+Run this code in your browser here: https://wokwi.com/arduino/projects/288823366490522125
+
 See the main WLED project at https://github.com/Aircoookie/WLED
 
 ## ✌️ Other
