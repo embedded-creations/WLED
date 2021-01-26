@@ -1,5 +1,7 @@
 #include "wled.h"
 
+// as of now basic effect functionality is working without the functions at the top being defined, maybe they're useful in the future
+#if 0
 /*
  * LED methods
  */
@@ -309,6 +311,7 @@ void handleNightlight()
     interfaceUpdateCallMode = 0; //disable updates to MQTT and Blynk
   }
 }
+#endif
 
 //utility for FastLED to use our custom timer
 uint32_t get_millisecond_timer()

@@ -24,6 +24,9 @@
   Modified for WLED
 */
 
+// wled.h contains my_config.h, and needs to be included at top of FX.h, before #ifndef WS2812FX_h check (as wled.h includes FX.h), so that the contents of FX.h is included into wled.h
+#include "wled.h"
+
 #ifndef WS2812FX_h
 #define WS2812FX_h
 
@@ -32,8 +35,6 @@
 #else
   #include "NpbWrapper.h"
 #endif
-
-#include "const.h"
 
 #define FASTLED_INTERNAL //remove annoying pragma messages
 #define USE_GET_MILLISECOND_TIMER
