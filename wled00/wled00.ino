@@ -1,5 +1,5 @@
 /*
- * WLED WS2812FX Effect Editor - Edit and Test WLED Effects with a Simplified Environment
+ * WLED WS2812FX Effects Editor - Edit and Test WLED Effects with a Simplified Environment
  *
  * This sketch can run on the Wokwi.com AVR Simulator
  * - copy contents of "my_config_sample_wokwi.h" to "my_config.h" (creating file if needed)
