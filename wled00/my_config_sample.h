@@ -16,5 +16,5 @@
 
 //#define LEDPIN 27           // customize which pin to use to drive Neopixels
 
-// Optionally use custom NpbWrapper with FastLED backend instead of NeoPixelBus
+// Optionally use custom NpbWrapper with FastLED backend instead of NeoPixelBus - currently only Neopixels are supported
 //#define CUSTOM_NPBWRAPPER_H "NpbWrapperFastLED.h"
