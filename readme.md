@@ -4,6 +4,8 @@ This fork of WLED is stripped down to the minimum needed to run WLED's WS2812FX 
 
 This can be useful for porting/testing/debugging an effect without the long compile and upload times that come with compiling the entire WLED codebase.
 
+More details are in the sketch (wled00/wled00.ino)
+
 This project should work with PlatformIO, but as I'm not that familiar with how to properly set up a PlatformIO project, I just removed WLED's PlatformIO files as I'm guessing they won't work as is.  If anyone wants to contribute a working PlatformIO project setup for this fork, I'd be happy to include it in the repo.
 
 See the main WLED project at https://github.com/Aircoookie/WLED
