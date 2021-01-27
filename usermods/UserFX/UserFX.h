@@ -1,0 +1,49 @@
+#pragma once
+
+#define USERFX_CAT(a,b) USERFX_CAT2(a,b) // force expand
+#define USERFX_CAT2(a,b) a##b // actually concatenate
+
+#ifdef USERFX1_H
+    #include USERFX1_H
+#endif
+
+#ifdef USERFX2_H
+    #include USERFX2_H
+#endif
+
+#define USERFX_STRING_PREFIX ",\""
+#define USERFX_STRING_SUFFIX "\""
+
+#ifdef USERFX1_NAME
+  #define USERFX_MODE_SUM1 (0+1)
+  #define USERFX1_MODE_NUM USERFX_MODE_SUM1
+  #define USERFX1_MODE_NAME USERFX_CAT(USERFX1_NAME,_MODE_NAME)
+  #define USERFX1_STRING USERFX_STRING_PREFIX USERFX_CAT(USERFX1_NAME,_MODE_STRING) USERFX_STRING_SUFFIX
+#else
+  #define USERFX_MODE_SUM1 (0+0)
+  #define USERFX1_STRING
+#endif
+
+#ifdef USERFX2_NAME
+  #define USERFX_MODE_SUM2 (USERFX_MODE_SUM1+1)
+  #define USERFX2_MODE_NUM USERFX_MODE_SUM2
+  #define USERFX2_MODE_NAME USERFX_CAT(USERFX2_NAME,_MODE_NAME)
+  #define USERFX2_STRING USERFX_STRING_PREFIX USERFX_CAT(USERFX2_NAME,_MODE_STRING) USERFX_STRING_SUFFIX
+#else
+  #define USERFX_MODE_SUM2 (USERFX_MODE_SUM1+0)
+  #define USERFX2_STRING
+#endif
+
+#define USERFX_MODE_COUNT USERFX_MODE_SUM2
+
+#define json_mode_names_userfx USERFX1_STRING USERFX2_STRING
+
+void addUserFxModesToMap() {
+  int i = 0;
+  #ifdef USERFX1_NAME
+    _mode[BUILTIN_MODE_COUNT + i++] = &WS2812FX::USERFX1_MODE_NAME;
+  #endif
+  #ifdef USERFX2_NAME
+    _mode[BUILTIN_MODE_COUNT + i++] = &WS2812FX::USERFX2_MODE_NAME;
+  #endif
+};

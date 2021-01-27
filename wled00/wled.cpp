@@ -303,6 +303,7 @@ void WLED::setup()
   WiFi.onEvent(WiFiEvent);
 
   Serial.println(F("Ada"));
+  //Serial.println(JSON_mode_names); // helpful for UserFX debugging
 
   // generate module IDs
   escapedMac = WiFi.macAddress();
