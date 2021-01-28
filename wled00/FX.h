@@ -119,6 +119,10 @@
 #define IS_REVERSE      ((SEGMENT.options & REVERSE     ) == REVERSE     )
 #define IS_SELECTED     ((SEGMENT.options & SELECTED    ) == SELECTED    )
 
+#ifdef ENABLE_FL_WRAPPER
+  #include "../usermods/FastLED_Compatibility/FL_Wrapper1.h"
+#endif
+
 #define BUILTIN_MODE_COUNT             118
 
 #define FX_MODE_STATIC                   0
@@ -805,6 +809,10 @@ class WS2812FX {
     #endif
 
     #define MODE_COUNT (BUILTIN_MODE_COUNT + USERFX_MODE_COUNT)
+
+    #ifdef ENABLE_FL_WRAPPER
+      #include "../usermods/FastLED_Compatibility/FL_Wrapper2.h"
+    #endif
 
   private:
     NeoPixelWrapper *bus;
