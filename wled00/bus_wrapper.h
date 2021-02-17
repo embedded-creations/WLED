@@ -173,7 +173,17 @@
 #endif
 
 //APA102
-#define B_HS_DOT_3 NeoPixelBrightnessBus<DotStarBgrFeature, DotStarSpiMethod> //hardware SPI
+//#define ESP32SPIDMATESTING
+
+// TODO: add HSPI options for the other SPI protocols?
+// TODO: add back DotStarHspiMethod after NeoPixelBus has a release
+
+#ifndef ESP32SPIDMATESTING
+  //#define B_HS_DOT_3 NeoPixelBrightnessBus<DotStarBgrFeature, DotStarHspiMethod> //hardware SPI
+  #define B_HS_DOT_3 NeoPixelBrightnessBus<DotStarBgrFeature, DotStarSpiMethod> //hardware SPI
+#else
+  #define B_HS_DOT_3 NeoPixelBrightnessBus<DotStarBgrFeature, DotStarEsp32DmaHspiMethod> //hardware SPI using DMA
+#endif
 #define B_SS_DOT_3 NeoPixelBrightnessBus<DotStarBgrFeature, DotStarMethod> //soft SPI
 
 //LPD8806
