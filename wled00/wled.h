@@ -611,6 +611,9 @@ bool oappend(const char* txt);
 // append new number to temp buffer efficiently
 bool oappendi(int i);
 
+// Rollover-safe comparison of two uint32_t millis() values, valid for up to ~24 days difference, source: https://arduino.stackexchange.com/a/12588
+#define IS_SECOND_MILLIS_VALUE_IN_FUTURE(t1, t2) (((t1) - (t2)) & 0x80000000)
+
 class WLED {
 public:
   WLED();

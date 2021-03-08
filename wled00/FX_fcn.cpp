@@ -98,8 +98,12 @@ void WS2812FX::UpdateLastShowDuration() {
 #endif
 
 void WS2812FX::service() {
+  static uint16_t delayBeforeNextShow = 0;
   uint32_t nowUp = millis(); // Be aware, millis() rolls over every 49 days
   now = nowUp + timebase;
+  
+  uint16_t smallestDelay = 65535;
+
   #ifdef ENABLE_SHOW_PROFILING
     UpdateLastShowDuration();
     
@@ -110,6 +114,9 @@ void WS2812FX::service() {
   #endif
 
   if (nowUp - _lastShow < MIN_SHOW_DELAY) return;
+  
+  if (nowUp - _lastShow < delayBeforeNextShow) return;
+
   bool doShow = false;
 
   for(uint8_t i=0; i < MAX_NUM_SEGMENTS; i++)
@@ -122,7 +129,7 @@ void WS2812FX::service() {
 
     if (!SEGMENT.isActive()) continue;
 
-    if(nowUp > SEGENV.next_time || _triggered || (doShow && SEGMENT.mode == 0)) //last is temporary
+    if(!IS_SECOND_MILLIS_VALUE_IN_FUTURE(nowUp, SEGENV.next_time) || _triggered)
     {
       if (SEGMENT.grouping == 0) SEGMENT.grouping = 1; //sanity check
       doShow = true;
@@ -144,7 +151,15 @@ void WS2812FX::service() {
         if (SEGMENT.mode != FX_MODE_HALLOWEEN_EYES) SEGENV.call++;
       }
 
-      SEGENV.next_time = nowUp + delay;
+      if(delay < smallestDelay)
+        smallestDelay = delay;
+
+      SEGENV.next_time += delay;
+
+      // correct for a segment that's fallen significantly behind the current frame rate
+      if(SEGENV.next_time < nowUp)
+        SEGENV.next_time = nowUp + delay;
+
       #ifdef ENABLE_SHOW_PROFILING
         // update here to try to get as accurate a duration as possible, as each call to mode() can take some time
         UpdateLastShowDuration();
@@ -163,6 +178,8 @@ void WS2812FX::service() {
       showCallStart = millis();
       showInProgress = true;
     #endif
+
+    delayBeforeNextShow = smallestDelay;
 
     show();
   }
