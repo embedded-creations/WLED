@@ -87,7 +87,7 @@ void deserializeSegment(JsonObject elem, byte it)
     
     //if (pal != seg.palette && pal < strip.getPaletteCount()) strip.setPalette(pal);
     seg.setOption(SEG_OPTION_SELECTED, elem[F("sel")] | seg.getOption(SEG_OPTION_SELECTED));
-    seg.setOption(SEG_OPTION_REVERSED, elem[F("rev")] | seg.getOption(SEG_OPTION_REVERSED));
+    seg.setOption(SEG_OPTION_REVERSED, elem["rev"] | seg.getOption(SEG_OPTION_REVERSED));
     seg.setOption(SEG_OPTION_MIRROR  , elem[F("mi")]  | seg.getOption(SEG_OPTION_MIRROR  ));
 
     //temporary, strip object gets updated via colorUpdated()
@@ -134,7 +134,7 @@ void deserializeSegment(JsonObject elem, byte it)
           if (sz == 0 && sz > 4) break;
 
           int rgbw[] = {0,0,0,0};
-          byte cp = copyArray(icol, rgbw);
+          copyArray(icol, rgbw);
 
           if (set < 2) stop = start + 1;
           for (uint16_t i = start; i < stop; i++) {
@@ -200,8 +200,8 @@ bool deserializeState(JsonObject root)
   receiveNotifications = udpn[F("recv")] | receiveNotifications;
   bool noNotification  = udpn[F("nn")]; //send no notification just for this request
 
-  unsigned long timein = root[F("time")] | -1;
-  if (timein != -1) {
+  unsigned long timein = root[F("time")] | UINT32_MAX;
+  if (timein != UINT32_MAX) {
     if (millis() - ntpLastSyncTime > 50000000L) setTime(timein);
     if (presetsModifiedTime == 0) presetsModifiedTime = timein;
   }
@@ -327,7 +327,7 @@ void serializeSegment(JsonObject& root, WS2812FX::Segment& seg, byte id, bool fo
 	root[F("ix")]  = seg.intensity;
 	root[F("pal")] = seg.palette;
 	root[F("sel")] = seg.isSelected();
-	root[F("rev")] = seg.getOption(SEG_OPTION_REVERSED);
+	root["rev"] = seg.getOption(SEG_OPTION_REVERSED);
   root[F("mi")]  = seg.getOption(SEG_OPTION_MIRROR);
 }
 

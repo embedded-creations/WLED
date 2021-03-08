@@ -47,7 +47,6 @@ class Bus {
   virtual void cleanup() {};
 
   virtual ~Bus() { //throw the bus under the bus
-    //Serial.println("Destructor!");
   }
 
   virtual uint8_t getPins(uint8_t* pinArray) { return 0; }
@@ -193,7 +192,7 @@ class BusPwm : public Bus {
 
     #ifdef ESP8266
     analogWriteRange(255);  //same range as one RGB channel
-    analogWriteFreq(WLED_PWM_FREQ_ESP8266);
+    analogWriteFreq(WLED_PWM_FREQ);
     #else
     _ledcStart = pinManager.allocateLedc(numPins);
     if (_ledcStart == 255) { //no more free LEDC channels
@@ -209,7 +208,7 @@ class BusPwm : public Bus {
       #ifdef ESP8266
       pinMode(_pins[i], OUTPUT);
       #else
-      ledcSetup(_ledcStart + i, WLED_PWM_FREQ_ESP32, 8);
+      ledcSetup(_ledcStart + i, WLED_PWM_FREQ, 8);
       ledcAttachPin(_pins[i], _ledcStart + i);
       #endif
     }
@@ -268,6 +267,10 @@ class BusPwm : public Bus {
     deallocatePins();
   }
 
+  ~BusPwm() {
+    cleanup();
+  }
+
   private: 
   uint8_t _pins[5] = {255, 255, 255, 255, 255};
   uint8_t _data[5] = {255, 255, 255, 255, 255};
@@ -297,6 +300,29 @@ class BusManager {
   BusManager() {
 
   };
+
+  //utility to get the approx. memory usage of a given BusConfig
+  uint32_t memUsage(BusConfig &bc) {
+    uint8_t type = bc.type;
+    uint16_t len = bc.count;
+    if (type < 32) {
+      #ifdef ESP8266
+        if (bc.pins[0] == 3) { //8266 DMA uses 5x the mem
+          if (type > 29) return len*20; //RGBW
+          return len*15;
+        }
+        if (type > 29) return len*4; //RGBW
+        return len*3;
+      #else //ESP32 RMT uses double buffer?
+        if (type > 29) return len*8; //RGBW
+        return len*6;
+      #endif
+    }
+
+    if (type > 31 && type < 48) return 5;
+    if (type == 44 || type == 45) return len*4; //RGBW
+    return len*3;
+  }
   
   int add(BusConfig &bc) {
     if (numBusses >= WLED_MAX_BUSSES) return -1;
@@ -317,7 +343,6 @@ class BusManager {
     for (uint8_t i = 0; i < numBusses; i++) delete busses[i];
     numBusses = 0;
   }
-  //void remove(uint8_t id);
 
   void show() {
     for (uint8_t i = 0; i < numBusses; i++) {

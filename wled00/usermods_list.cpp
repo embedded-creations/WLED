@@ -22,6 +22,9 @@
 #ifdef USERMOD_SENSORSTOMQTT
 #include "usermod_v2_SensorsToMqtt.h"
 #endif
+#ifdef USERMOD_MODE_SORT
+#include "../usermods/usermod_v2_mode_sort/usermod_v2_mode_sort.h"
+#endif
 
 #if (defined(ENABLE_FL_MAPPING) || defined(ENABLE_FL_WRAPPER))
   #include "../usermods/FastLED_Compatibility/FL_Mapping_Usermod.h"
@@ -72,25 +75,31 @@ void registerUsermods()
   #ifdef USERMOD_BME280
   usermods.add(new UsermodBME280());
   #endif
-
-  #ifdef USERMOD_SENSORSTOMQTT
+#ifdef USERMOD_SENSORSTOMQTT
   usermods.add(new UserMod_SensorsToMQTT());
-  #endif
+#endif
 
-  #ifdef USERMOD_ROTARY_ENCODER_UI
+#ifdef USERMOD_MODE_SORT
+  usermods.add(new ModeSortUsermod());
+#endif
+#ifdef USERMOD_FOUR_LINE_DISLAY
+  usermods.add(new FourLineDisplayUsermod());
+#endif
+#ifdef USERMOD_ROTARY_ENCODER_UI
   usermods.add(new RotaryEncoderUIUsermod());
-  #endif
+#endif
+#ifdef USERMOD_AUTO_SAVE
+  usermods.add(new AutoSaveUsermod());
+#endif
 
-  #ifdef USERMOD_DHT
-  usermods.add(new UsermodDHT());
-  #endif
+#ifdef USERMOD_DHT
+usermods.add(new UsermodDHT());
+#endif
+#ifdef ENABLE_FL_MAPPING
+usermods.add(new Usermod_FL_Mapping());
+#endif
 
-  #ifdef ENABLE_FL_MAPPING
-  usermods.add(new Usermod_FL_Mapping());
-  #endif
-
-  #ifdef USERMOD_ANIMATEDGIFS
-  usermods.add(new AnimatedGifsUsermod());
-  #endif
+#ifdef USERMOD_ANIMATEDGIFS
+usermods.add(new AnimatedGifsUsermod());
+#endif
 }
-

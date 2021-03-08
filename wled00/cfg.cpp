@@ -30,8 +30,8 @@ void deserializeConfig() {
     return;
   }
 
-  //int rev_major = doc[F("rev")][0]; // 1
-  //int rev_minor = doc[F("rev")][1]; // 0
+  //int rev_major = doc["rev"][0]; // 1
+  //int rev_minor = doc["rev"][1]; // 0
 
   //long vid = doc[F("vid")]; // 2010020
 
@@ -95,13 +95,14 @@ void deserializeConfig() {
 
   CJSON(strip.ablMilliampsMax, hw_led[F("maxpwr")]);
   CJSON(strip.milliampsPerLed, hw_led[F("ledma")]);
-  CJSON(strip.reverseMode, hw_led[F("rev")]);
+  CJSON(strip.reverseMode, hw_led["rev"]);
   CJSON(strip.rgbwMode, hw_led[F("rgbwm")]);
 
   JsonArray ins = hw_led["ins"];
-  uint8_t s = 0;
+  uint8_t s = 0; //bus iterator
   useRGBW = false;
   busses.removeAll();
+  uint32_t mem = 0;
   for (JsonObject elm : ins) {
     if (s >= WLED_MAX_BUSSES) break;
     uint8_t pins[5] = {255, 255, 255, 255, 255};
@@ -125,12 +126,13 @@ void deserializeConfig() {
     //limit length of strip if it would exceed total configured LEDs
     if (start + length > ledCount) length = ledCount - start;
     uint8_t ledType = elm[F("type")] | TYPE_WS2812_RGB;
-    bool reversed = elm[F("rev")];
+    bool reversed = elm["rev"];
     //RGBW mode is enabled if at least one of the strips is RGBW
     useRGBW = (useRGBW || BusManager::isRgbw(ledType));
     s++;
     BusConfig bc = BusConfig(ledType, pins, start, length, colorOrder, reversed);
-    busses.add(bc);
+    mem += busses.memUsage(bc);
+    if (mem <= MAX_LED_MEMORY) busses.add(bc);
   }
   strip.finalizeInit(useRGBW, ledCount, skipFirstLed);
 
@@ -161,14 +163,18 @@ void deserializeConfig() {
   #endif
   CJSON(irEnabled, hw[F("ir")][F("type")]);
 
-  int hw_relay_pin = hw[F("relay")][F("pin")];
+  JsonObject relay = hw[F("relay")];
+
+  int hw_relay_pin = relay[F("pin")];
   if (pinManager.allocatePin(hw_relay_pin,true)) {
     rlyPin = hw_relay_pin;
     pinMode(rlyPin, OUTPUT);
   } else {
     rlyPin = -1;
   }
-  CJSON(rlyMde, hw[F("relay")][F("rev")]);
+  if (relay.containsKey("rev")) {
+    rlyMde = !relay["rev"];
+  }
 
   //int hw_status_pin = hw[F("status")][F("pin")]; // -1
 
@@ -441,12 +447,11 @@ void serializeConfig() {
   hw_led[F("total")] = ledCount;
   hw_led[F("maxpwr")] = strip.ablMilliampsMax;
   hw_led[F("ledma")] = strip.milliampsPerLed;
-  hw_led[F("rev")] = strip.reverseMode;
+  hw_led["rev"] = strip.reverseMode;
   hw_led[F("rgbwm")] = strip.rgbwMode;
 
   JsonArray hw_led_ins = hw_led.createNestedArray("ins");
 
-  uint16_t start = 0;
   for (uint8_t s = 0; s < busses.getNumBusses(); s++) {
     Bus *bus = busses.getBus(s);
     if (!bus || bus->getLength()==0) break;
@@ -459,7 +464,7 @@ void serializeConfig() {
     uint8_t nPins = bus->getPins(pins);
     for (uint8_t i = 0; i < nPins; i++) ins_pin.add(pins[i]);
     ins[F("order")] = bus->getColorOrder();
-    ins[F("rev")] = bus->reversed;
+    ins["rev"] = bus->reversed;
     ins[F("skip")] = (skipFirstLed && s == 0) ? 1 : 0;
     ins[F("type")] = bus->getType();
   }
@@ -490,7 +495,7 @@ void serializeConfig() {
 
   JsonObject hw_relay = hw.createNestedObject("relay");
   hw_relay[F("pin")] = rlyPin;
-  hw_relay[F("rev")] = rlyMde;
+  hw_relay["rev"] = !rlyMde;
 
   //JsonObject hw_status = hw.createNestedObject("status");
   //hw_status[F("pin")] = -1;
