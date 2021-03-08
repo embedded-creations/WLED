@@ -334,6 +334,7 @@ class WS2812FX {
       uint32_t call;
       uint16_t aux0;
       uint16_t aux1;
+      bool readyToShow;
       byte* data = nullptr;
       bool allocateData(uint16_t len){
         if (data && _dataLen == len) return true; //already allocated
@@ -362,7 +363,7 @@ class WS2812FX {
        */
       void resetIfRequired() {
         if (_requiresReset) {
-          next_time = 0; step = 0; call = 0; aux0 = 0; aux1 = 0; 
+          next_time = 0; step = 0; call = 0; aux0 = 0; aux1 = 0; readyToShow = false;
           deallocateData();
           _requiresReset = false;
         }

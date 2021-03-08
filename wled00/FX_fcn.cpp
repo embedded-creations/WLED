@@ -100,11 +100,24 @@ void WS2812FX::UpdateLastShowDuration() {
 
 void WS2812FX::service() {
   static uint16_t delayBeforeNextShow = 0;
-  uint32_t nowUp = millis(); // Be aware, millis() rolls over every 49 days
-  now = nowUp + timebase;
-  
-  uint16_t smallestDelay = 65535;
+  static bool doShow = false;
+  static uint16_t smallestDelay = 65535;
 
+  uint32_t nowUp = millis(); // Be aware, millis() rolls over every 49 days
+  uint32_t nextShowTime;
+
+  #ifdef ENABLE_FX_COMPUTE_IN_ADVANCE
+    // if we're running before we can show, peer into the future and let the effects think it's whatever time we hope to call show()
+    if(PENDING(nowUp, _lastShow + delayBeforeNextShow))
+      nextShowTime = _lastShow + delayBeforeNextShow;
+    else
+      nextShowTime = nowUp;
+  #else 
+    nextShowTime = nowUp;
+  #endif
+
+  now = nextShowTime + timebase;
+  
   #ifdef ENABLE_SHOW_PROFILING
     UpdateLastShowDuration();
     
@@ -114,11 +127,6 @@ void WS2812FX::service() {
     }
   #endif
 
-  if (nowUp - _lastShow < MIN_SHOW_DELAY) return;
-  
-  if (nowUp - _lastShow < delayBeforeNextShow) return;
-
-  bool doShow = false;
 
   for(uint8_t i=0; i < MAX_NUM_SEGMENTS; i++)
   {
@@ -130,7 +138,7 @@ void WS2812FX::service() {
 
     if (!SEGMENT.isActive()) continue;
 
-    if(!IS_SECOND_MILLIS_VALUE_IN_FUTURE(nowUp, SEGENV.next_time) || _triggered)
+    if(!SEGENV.readyToShow && (ELAPSED(nextShowTime, SEGENV.next_time) || _triggered))
     {
       if (SEGMENT.grouping == 0) SEGMENT.grouping = 1; //sanity check
       doShow = true;
@@ -158,17 +166,22 @@ void WS2812FX::service() {
       SEGENV.next_time += delay;
 
       // correct for a segment that's fallen significantly behind the current frame rate
-      if(SEGENV.next_time < nowUp)
-        SEGENV.next_time = nowUp + delay;
+      if(SEGENV.next_time < nextShowTime)
+        SEGENV.next_time = nextShowTime + delay;
 
       #ifdef ENABLE_SHOW_PROFILING
         // update here to try to get as accurate a duration as possible, as each call to mode() can take some time
         UpdateLastShowDuration();
       #endif
+
+      SEGENV.readyToShow = true;
     }
   }
+
   _virtualSegmentLength = 0;
-  if(doShow) {
+
+  // we use millis() and not nowUp here as significant time could have passed while updating the segments above
+  if(doShow && ELAPSED(millis(), _lastShow + delayBeforeNextShow)) {
     yield();
 
     #ifdef ENABLE_SHOW_PROFILING
@@ -180,10 +193,20 @@ void WS2812FX::service() {
       showInProgress = true;
     #endif
 
+    if(smallestDelay < MIN_SHOW_DELAY)
+      smallestDelay = MIN_SHOW_DELAY;
+
     delayBeforeNextShow = smallestDelay;
+    smallestDelay = 65535;
 
     show();
+
+    for(int i=0; i<MAX_NUM_SEGMENTS; i++)
+      _segment_runtimes[i].readyToShow = false;
+
+    doShow = false;
   }
+
   _triggered = false;
 }
 
