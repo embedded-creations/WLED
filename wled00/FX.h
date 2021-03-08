@@ -882,6 +882,14 @@ class WS2812FX {
     uint32_t _lastPaletteChange = 0;
     uint32_t _lastShow = 0;
 
+    #ifdef ENABLE_SHOW_PROFILING
+      // TODO: micros not millis, average
+      void UpdateLastShowDuration();
+      bool showInProgress = false;
+      uint32_t showCallStart = 0;
+      uint32_t lastShowDuration = 0;
+    #endif
+
     uint32_t _colors_t[3];
     uint8_t _bri_t;
     
