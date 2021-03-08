@@ -87,9 +87,28 @@ void WS2812FX::finalizeInit(bool supportWhite, uint16_t countPixels, bool skipFi
   #endif
 }
 
+#ifdef ENABLE_SHOW_PROFILING
+void WS2812FX::UpdateLastShowDuration() {
+  if(showInProgress && !isUpdating()) {
+    lastShowDuration = millis() - showCallStart;
+
+    showInProgress = false;
+  }
+}
+#endif
+
 void WS2812FX::service() {
   uint32_t nowUp = millis(); // Be aware, millis() rolls over every 49 days
   now = nowUp + timebase;
+  #ifdef ENABLE_SHOW_PROFILING
+    UpdateLastShowDuration();
+    
+    EVERY_N_MILLIS(1000) {
+      Serial.print("lastShowDuration = ");
+      Serial.println(lastShowDuration);
+    }
+  #endif
+
   if (nowUp - _lastShow < MIN_SHOW_DELAY) return;
   bool doShow = false;
 
@@ -126,11 +145,25 @@ void WS2812FX::service() {
       }
 
       SEGENV.next_time = nowUp + delay;
+      #ifdef ENABLE_SHOW_PROFILING
+        // update here to try to get as accurate a duration as possible, as each call to mode() can take some time
+        UpdateLastShowDuration();
+      #endif
     }
   }
   _virtualSegmentLength = 0;
   if(doShow) {
     yield();
+
+    #ifdef ENABLE_SHOW_PROFILING
+      // calling show() before the segments are ready results in waiting, wait here instead so UpdateLastShowDuration() can get a value
+      while(isUpdating());
+
+      UpdateLastShowDuration();
+      showCallStart = millis();
+      showInProgress = true;
+    #endif
+
     show();
   }
   _triggered = false;
