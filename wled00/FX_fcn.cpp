@@ -99,7 +99,7 @@ void WS2812FX::UpdateLastShowDuration() {
 #endif
 
 void WS2812FX::service() {
-  static uint16_t delayBeforeNextShow = 0;
+  static uint16_t delayBeforeNextShow = MIN_SHOW_DELAY;
   static bool doShow = false;
   static uint16_t smallestDelay = 65535;
 
@@ -113,6 +113,8 @@ void WS2812FX::service() {
     else
       nextShowTime = nowUp;
   #else 
+    if(PENDING(nowUp, _lastShow + delayBeforeNextShow))
+      return;
     nextShowTime = nowUp;
   #endif
 

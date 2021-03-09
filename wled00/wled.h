@@ -616,8 +616,10 @@ bool oappend(const char* txt);
 // append new number to temp buffer efficiently
 bool oappendi(int i);
 
-// Rollover-safe comparison of two uint32_t millis() values, valid for up to ~24 days difference, works with gcc only source: https://arduino.stackexchange.com/a/12588
+// Rollover-safe comparison of two uint32_t millis() values, valid for up to ~24 days difference source: https://arduino.stackexchange.com/a/12588
+// PENDING(ms,time): Relative to ms, time is pending.
 #define PENDING(NOW,SOON) (((NOW)-(SOON)) > LONG_MAX)
+// ELAPSED(ms,time): Relative to ms, time has elapsed.
 #define ELAPSED(NOW,SOON) (!PENDING(NOW,SOON))
 
 class WLED {
