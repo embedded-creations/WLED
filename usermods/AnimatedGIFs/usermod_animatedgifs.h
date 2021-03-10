@@ -100,6 +100,27 @@ void agifsSetNextGifIndex(int index, bool switchImmediately) {
     playNextGif = true;
 }
 
+unsigned int currentFrameDelay = 0;
+uint32_t lastFrameDisplayTime = 0;
+
+uint16_t agifsGetCurrentFrameDelay() {
+  return currentFrameDelay;
+}
+
+uint32_t agifsGetNextFrameDisplayTime() {
+  return lastFrameDisplayTime + currentFrameDelay;
+}
+
+uint16_t agifsGetMillisToNextFrameDisplay() {
+  uint32_t now = millis();
+
+  if (((lastFrameDisplayTime + currentFrameDelay) - now) & 0x80000000) { // test the "sign" bit - if true, then next frame display time is in the past
+    return 0;
+  } else {
+    return (lastFrameDisplayTime + currentFrameDelay) - now;
+  }
+}
+
 #ifdef AGIFS_USE_SD
   int initFileSystem_SD() {
     bool result;
@@ -239,9 +260,6 @@ class AnimatedGifsUsermod : public Usermod {
       // these variables keep track of when it's time to play a new GIF
       static unsigned long displayStartTime_millis;
       
-      // these variables keep track of when we're done displaying the last frame and are ready for a new frame
-      static uint32_t lastFrameDisplayTime = 0;
-      static unsigned int currentFrameDelay = 0;
 
       unsigned long now = millis();
 
