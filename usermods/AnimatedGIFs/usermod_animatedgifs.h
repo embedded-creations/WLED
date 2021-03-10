@@ -15,17 +15,14 @@
 
 // these gifs were made by resizing the original GIFs (source unknown) using ezgif.com and converted to C headers using https://github.com/bitbank2/image_to_c
 #include "infinity1.h"
-//#include "infinity2.h"
 #include "rainbow1.h"
 #include "rainbow2.h"
 
 // add gif name and sizeof(gif) to the below lists
-const uint8_t * gifsList[] = { rainbow2, rainbow1, infinity1 };
+//const uint8_t * gifsList[] = { rainbow2, rainbow1, infinity1 };
+const uint8_t * gifsList[] = { rainbow2, rainbow1 }; // infinity1 is a useful small file size (maybe good for the ESP8266?) but rather boring, so it's not in the list by default
 const char * gifsNameList[] = { "rainbow2", "rainbow1", "infinity1" }; // can contain zero-length or NULL strings, or a zero-length array if you don't want to print the name)
 const int gifsSizeList[] = { sizeof(rainbow2), sizeof(rainbow1), sizeof(infinity1) };
-//const uint8_t * gifsList[] = { infinity1 };
-//const char * gifsNameList[] = { "infinity1" }; // can contain zero-length or NULL strings, or a zero-length array if you don't want to print the name)
-//const int gifsSizeList[] = { sizeof(infinity1) };
 
 // defaults in case config hasn't been written to cfg.json yet
 #define DISPLAY_TIME_SECONDS 10
