@@ -136,7 +136,7 @@ class MyExampleUsermod : public Usermod {
      */
     void readFromConfig(JsonObject& root)
     {
-      JsonObject top = root["top"];
+      JsonObject top = root["exampleUsermod"];
       userVar0 = top["great"] | 42; //The value right of the pipe "|" is the default value in case your setting was not present in cfg.json (e.g. first boot)
     }
 
