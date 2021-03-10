@@ -97,6 +97,10 @@
 #define I_HS_P98_3 63
 #define I_SS_P98_3 64
 
+// APA102 2/4bit
+#define I_HS_APA102_2BIT 65
+#define I_HS_APA102_4BIT 66
+
 
 /*** ESP8266 Neopixel methods ***/
 #ifdef ESP8266
@@ -173,16 +177,12 @@
 #endif
 
 //APA102
-//#define ESP32SPIDMATESTING
-
-// TODO: add HSPI options for the other SPI protocols?
-// TODO: add back DotStarHspiMethod after NeoPixelBus has a release
-
-#ifndef ESP32SPIDMATESTING
-  //#define B_HS_DOT_3 NeoPixelBrightnessBus<DotStarBgrFeature, DotStarHspiMethod> //hardware SPI
+#ifndef USING_UNRELEASED_NPB_FEATURES
   #define B_HS_DOT_3 NeoPixelBrightnessBus<DotStarBgrFeature, DotStarSpiMethod> //hardware SPI
 #else
-  #define B_HS_DOT_3 NeoPixelBrightnessBus<DotStarBgrFeature, DotStarEsp32DmaHspiMethod> //hardware SPI using DMA
+  #define B_HS_DOT_3 NeoPixelBrightnessBus<DotStarBgrFeature, DotStarEsp32DmaHspiHzMethod> //hardware SPI using DMA
+  #define B_HS_DOT_2BIT NeoPixelBrightnessBus<DotStarBgrFeature, DotStarEsp32DmaHspi2BitHzMethod> //hardware SPI using DMA
+  #define B_HS_DOT_4BIT NeoPixelBrightnessBus<DotStarBgrFeature, DotStarEsp32DmaHspi4BitHzMethod> //hardware SPI using DMA
 #endif
 #define B_SS_DOT_3 NeoPixelBrightnessBus<DotStarBgrFeature, DotStarMethod> //soft SPI
 
@@ -268,11 +268,33 @@ class PolyBus {
       case I_32_I0_TM1_4: (static_cast<B_32_I0_TM1_4*>(busPtr))->Begin(); break;
       case I_32_I1_TM1_4: (static_cast<B_32_I1_TM1_4*>(busPtr))->Begin(); break;
       // ESP32 can (and should, to avoid inadvertantly driving the chip select signal) specify the pins used for SPI, but only in begin()
-    #endif
       case I_HS_LPD_3: (static_cast<B_HS_LPD_3*>(busPtr))->Begin(pins[0], -1, pins[1], -1); break;
       case I_HS_WS1_3: (static_cast<B_HS_WS1_3*>(busPtr))->Begin(pins[0], -1, pins[1], -1); break;
       case I_HS_P98_3: (static_cast<B_HS_P98_3*>(busPtr))->Begin(pins[0], -1, pins[1], -1); break;
-      case I_HS_DOT_3: (static_cast<B_HS_DOT_3*>(busPtr))->Begin(pins[0], -1, pins[1], -1); break;
+
+      #ifndef USING_UNRELEASED_NPB_FEATURES
+        case I_HS_DOT_3: (static_cast<B_HS_DOT_3*>(busPtr))->Begin(pins[0], -1, pins[1], -1); break;
+      #else
+        case I_HS_DOT_3: 
+          (static_cast<B_HS_DOT_3*>(busPtr))->SetMethodSettings(NeoSpiSettings((uint32_t)clkspeed*1000));
+          (static_cast<B_HS_DOT_3*>(busPtr))->Begin(pins[0], -1, pins[1], -1);
+          break;
+        case I_HS_APA102_2BIT:
+          (static_cast<B_HS_DOT_2BIT*>(busPtr))->SetMethodSettings(NeoSpiSettings((uint32_t)clkspeed*1000));
+          (static_cast<B_HS_DOT_2BIT*>(busPtr))->Begin(pins[0], pins[1], pins[2], -1, -1, -1);
+          break;
+        case I_HS_APA102_4BIT:
+          (static_cast<B_HS_DOT_4BIT*>(busPtr))->SetMethodSettings(NeoSpiSettings((uint32_t)clkspeed*1000));
+          (static_cast<B_HS_DOT_4BIT*>(busPtr))->Begin(pins[0], pins[1], pins[2], pins[3], pins[4], -1);
+          break;
+      #endif
+    #else
+      // NeoPixelBus doesn't support the Begin() call specifying pins on the ESP8266
+      case I_HS_DOT_3: (static_cast<B_HS_DOT_3*>(busPtr))->Begin(); break;
+      case I_HS_LPD_3: (static_cast<B_HS_LPD_3*>(busPtr))->Begin(); break;
+      case I_HS_WS1_3: (static_cast<B_HS_WS1_3*>(busPtr))->Begin(); break;
+      case I_HS_P98_3: (static_cast<B_HS_P98_3*>(busPtr))->Begin(); break;
+    #endif // ARDUINO_ARCH_ESP32
       case I_SS_DOT_3: (static_cast<B_SS_DOT_3*>(busPtr))->Begin(); break;
       case I_SS_LPD_3: (static_cast<B_SS_LPD_3*>(busPtr))->Begin(); break;
       case I_SS_WS1_3: (static_cast<B_SS_WS1_3*>(busPtr))->Begin(); break;
@@ -345,6 +367,10 @@ class PolyBus {
     #endif
       // for 2-wire: pins[0] is clk, pins[1] is dat.  begin expects (len, clk, dat)
       case I_HS_DOT_3: busPtr = new B_HS_DOT_3(len, pins[0], pins[1]); break;
+      #ifdef USING_UNRELEASED_NPB_FEATURES
+        case I_HS_APA102_2BIT: busPtr = new B_HS_DOT_2BIT(len, pins[0], pins[1]); break;
+        case I_HS_APA102_4BIT: busPtr = new B_HS_DOT_4BIT(len, pins[0], pins[1]); break;
+      #endif
       case I_SS_DOT_3: busPtr = new B_SS_DOT_3(len, pins[0], pins[1]); break;
       case I_HS_LPD_3: busPtr = new B_HS_LPD_3(len, pins[0], pins[1]); break;
       case I_SS_LPD_3: busPtr = new B_SS_LPD_3(len, pins[0], pins[1]); break;
@@ -420,6 +446,10 @@ class PolyBus {
       case I_32_I1_TM1_4: (static_cast<B_32_I1_TM1_4*>(busPtr))->Show(); break;
     #endif
       case I_HS_DOT_3: (static_cast<B_HS_DOT_3*>(busPtr))->Show(); break;
+      #ifdef USING_UNRELEASED_NPB_FEATURES
+        case I_HS_APA102_2BIT: (static_cast<B_HS_DOT_2BIT*>(busPtr))->Show(); break;
+        case I_HS_APA102_4BIT: (static_cast<B_HS_DOT_4BIT*>(busPtr))->Show(); break;
+      #endif
       case I_SS_DOT_3: (static_cast<B_SS_DOT_3*>(busPtr))->Show(); break;
       case I_HS_LPD_3: (static_cast<B_HS_LPD_3*>(busPtr))->Show(); break;
       case I_SS_LPD_3: (static_cast<B_SS_LPD_3*>(busPtr))->Show(); break;
@@ -493,6 +523,10 @@ class PolyBus {
       case I_32_I1_TM1_4: return (static_cast<B_32_I1_TM1_4*>(busPtr))->CanShow(); break;
     #endif
       case I_HS_DOT_3: return (static_cast<B_HS_DOT_3*>(busPtr))->CanShow(); break;
+      #ifdef USING_UNRELEASED_NPB_FEATURES
+        case I_HS_APA102_2BIT: return (static_cast<B_HS_DOT_2BIT*>(busPtr))->CanShow(); break;
+        case I_HS_APA102_4BIT: return (static_cast<B_HS_DOT_4BIT*>(busPtr))->CanShow(); break;
+      #endif
       case I_SS_DOT_3: return (static_cast<B_SS_DOT_3*>(busPtr))->CanShow(); break;
       case I_HS_LPD_3: return (static_cast<B_HS_LPD_3*>(busPtr))->CanShow(); break;
       case I_SS_LPD_3: return (static_cast<B_SS_LPD_3*>(busPtr))->CanShow(); break;
@@ -590,6 +624,10 @@ class PolyBus {
       case I_32_I1_TM1_4: (static_cast<B_32_I1_TM1_4*>(busPtr))->SetPixelColor(pix, col); break;
     #endif
       case I_HS_DOT_3: (static_cast<B_HS_DOT_3*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
+      #ifdef USING_UNRELEASED_NPB_FEATURES
+        case I_HS_APA102_2BIT: (static_cast<B_HS_DOT_2BIT*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
+        case I_HS_APA102_4BIT: (static_cast<B_HS_DOT_4BIT*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
+      #endif
       case I_SS_DOT_3: (static_cast<B_SS_DOT_3*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
       case I_HS_LPD_3: (static_cast<B_HS_LPD_3*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
       case I_SS_LPD_3: (static_cast<B_SS_LPD_3*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
@@ -663,6 +701,10 @@ class PolyBus {
       case I_32_I1_TM1_4: (static_cast<B_32_I1_TM1_4*>(busPtr))->SetBrightness(b); break;
     #endif
       case I_HS_DOT_3: (static_cast<B_HS_DOT_3*>(busPtr))->SetBrightness(b); break;
+      #ifdef USING_UNRELEASED_NPB_FEATURES
+        case I_HS_APA102_2BIT: (static_cast<B_HS_DOT_2BIT*>(busPtr))->SetBrightness(b); break;
+        case I_HS_APA102_4BIT: (static_cast<B_HS_DOT_4BIT*>(busPtr))->SetBrightness(b); break;
+      #endif
       case I_SS_DOT_3: (static_cast<B_SS_DOT_3*>(busPtr))->SetBrightness(b); break;
       case I_HS_LPD_3: (static_cast<B_HS_LPD_3*>(busPtr))->SetBrightness(b); break;
       case I_SS_LPD_3: (static_cast<B_SS_LPD_3*>(busPtr))->SetBrightness(b); break;
@@ -737,6 +779,10 @@ class PolyBus {
       case I_32_I1_TM1_4: col = (static_cast<B_32_I1_TM1_4*>(busPtr))->GetPixelColor(pix); break;
     #endif
       case I_HS_DOT_3: col = (static_cast<B_HS_DOT_3*>(busPtr))->GetPixelColor(pix); break;
+      #ifdef USING_UNRELEASED_NPB_FEATURES
+        case I_HS_APA102_2BIT: col = (static_cast<B_HS_DOT_2BIT*>(busPtr))->GetPixelColor(pix); break;
+        case I_HS_APA102_4BIT: col = (static_cast<B_HS_DOT_4BIT*>(busPtr))->GetPixelColor(pix); break;
+      #endif
       case I_SS_DOT_3: col = (static_cast<B_SS_DOT_3*>(busPtr))->GetPixelColor(pix); break;
       case I_HS_LPD_3: col = (static_cast<B_HS_LPD_3*>(busPtr))->GetPixelColor(pix); break;
       case I_SS_LPD_3: col = (static_cast<B_SS_LPD_3*>(busPtr))->GetPixelColor(pix); break;
@@ -828,6 +874,10 @@ class PolyBus {
       case I_32_I1_TM1_4: delete (static_cast<B_32_I1_TM1_4*>(busPtr)); break;
     #endif
       case I_HS_DOT_3: delete (static_cast<B_HS_DOT_3*>(busPtr)); break;
+      #ifdef USING_UNRELEASED_NPB_FEATURES
+        case I_HS_APA102_2BIT: delete (static_cast<B_HS_DOT_2BIT*>(busPtr)); break;
+        case I_HS_APA102_4BIT: delete (static_cast<B_HS_DOT_4BIT*>(busPtr)); break;
+      #endif
       case I_SS_DOT_3: delete (static_cast<B_SS_DOT_3*>(busPtr)); break;
       case I_HS_LPD_3: delete (static_cast<B_HS_LPD_3*>(busPtr)); break;
       case I_SS_LPD_3: delete (static_cast<B_SS_LPD_3*>(busPtr)); break;
@@ -854,6 +904,10 @@ class PolyBus {
         case TYPE_LPD8806: t = I_SS_LPD_3; break;
         case TYPE_WS2801:  t = I_SS_WS1_3; break;
         case TYPE_P9813:   t = I_SS_P98_3; break;
+        #ifdef USING_UNRELEASED_NPB_FEATURES
+          case TYPE_APA102_2BIT:   t = I_HS_APA102_2BIT; isHSPI = false; break;
+          case TYPE_APA102_4BIT:   t = I_HS_APA102_4BIT; isHSPI = false; break;
+        #endif
         default: t=I_NONE;
       }
       if (t > I_NONE && isHSPI) t--; //hardware SPI has one smaller ID than software
