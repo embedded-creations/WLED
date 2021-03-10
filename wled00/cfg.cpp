@@ -126,13 +126,13 @@ void deserializeConfig() {
     //limit length of strip if it would exceed total configured LEDs
     if (start + length > ledCount) length = ledCount - start;
     uint8_t ledType = elm[F("type")] | TYPE_WS2812_RGB;
-    bool reversed = elm["rev"];
+    bool reversed = elm[F("rev")];
+    uint16_t clockSpeed = elm[F("clkspeed")] | 5000;
     //RGBW mode is enabled if at least one of the strips is RGBW
     useRGBW = (useRGBW || BusManager::isRgbw(ledType));
     s++;
-    BusConfig bc = BusConfig(ledType, pins, start, length, colorOrder, reversed);
-    mem += busses.memUsage(bc);
-    if (mem <= MAX_LED_MEMORY) busses.add(bc);
+    BusConfig bc = BusConfig(ledType, pins, start, length, colorOrder, reversed, clockSpeed);
+    busses.add(bc);
   }
   strip.finalizeInit(useRGBW, ledCount, skipFirstLed);
 

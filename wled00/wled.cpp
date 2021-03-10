@@ -2,6 +2,8 @@
 #include "wled.h"
 #include <Arduino.h>
 
+#define DEBUG_GPIO_2  GPIO_NUM_19
+
 /*
  * Main WLED class implementation. Mostly initialization and connection logic
  */
@@ -234,8 +236,16 @@ void WLED::loop()
 
     yield();
 
-    if (!offMode)
+    if (!offMode) {
+      #ifdef DEBUG_GPIO_2
+        gpio_set_level(DEBUG_GPIO_2, 1);
+      #endif
       strip.service();
+      #ifdef DEBUG_GPIO_2
+        gpio_set_level(DEBUG_GPIO_2, 0);
+      #endif
+    }
+
 #ifdef ESP8266
     else if (!noWifiSleep)
       delay(1); //required to make sure ESP enters modem sleep (see #1184)
@@ -279,6 +289,13 @@ void WLED::loop()
 
 void WLED::setup()
 {
+  #ifdef DEBUG_GPIO_2
+    gpio_pad_select_gpio(DEBUG_GPIO_2);
+    gpio_set_direction(DEBUG_GPIO_2, GPIO_MODE_OUTPUT);
+    gpio_set_level(DEBUG_GPIO_2, 1);
+    gpio_set_level(DEBUG_GPIO_2, 0);
+  #endif
+
   Serial.begin(115200);
   Serial.setTimeout(50);
   DEBUG_PRINTLN();

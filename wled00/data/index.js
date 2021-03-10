@@ -814,7 +814,7 @@ function requestJson(command, rinfo = true, verbose = true) {
       switch (s.error) {
         case 10: errstr = "Could not mount filesystem!"; break;
         case 11: errstr = "Not enough space to save preset!"; break;
-        case 12: errstr = "The requested preset does not exist."; break;
+        case 12: errstr = "The requested preset does not exist. (See Config->LEDs->Defaults)"; break;
         case 19: errstr = "A filesystem error has occured."; break;
       }
       showToast('Error ' + s.error + ": " + errstr, true);

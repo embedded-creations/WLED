@@ -53,7 +53,9 @@
 //#define WLED_DISABLE_FX_HIGH_FLASH_USE
 
 /* Not used in all effects yet */
-#define WLED_FPS         42
+#ifndef WLED_FPS
+  #define WLED_FPS         42
+#endif
 #define FRAMETIME        (1000/WLED_FPS)
 
 /* each segment uses 52 bytes of SRAM memory, so if you're application fails because of

@@ -15,17 +15,14 @@
 
 // these gifs were made by resizing the original GIFs (source unknown) using ezgif.com and converted to C headers using https://github.com/bitbank2/image_to_c
 #include "infinity1.h"
-//#include "infinity2.h"
 #include "rainbow1.h"
 #include "rainbow2.h"
 
 // add gif name and sizeof(gif) to the below lists
-const uint8_t * gifsList[] = { rainbow2, rainbow1, infinity1 };
+//const uint8_t * gifsList[] = { rainbow2, rainbow1, infinity1 };
+const uint8_t * gifsList[] = { rainbow2, rainbow1 }; // infinity1 is a useful small file size (maybe good for the ESP8266?) but rather boring, so it's not in the list by default
 const char * gifsNameList[] = { "rainbow2", "rainbow1", "infinity1" }; // can contain zero-length or NULL strings, or a zero-length array if you don't want to print the name)
 const int gifsSizeList[] = { sizeof(rainbow2), sizeof(rainbow1), sizeof(infinity1) };
-//const uint8_t * gifsList[] = { infinity1 };
-//const char * gifsNameList[] = { "infinity1" }; // can contain zero-length or NULL strings, or a zero-length array if you don't want to print the name)
-//const int gifsSizeList[] = { sizeof(infinity1) };
 
 // defaults in case config hasn't been written to cfg.json yet
 #define DISPLAY_TIME_SECONDS 10
@@ -40,6 +37,7 @@ const int gifsSizeList[] = { sizeof(rainbow2), sizeof(rainbow1), sizeof(infinity
 // The ESP32 SD library has a bug that sometimes requires SD.begin() to be called multiple times to work, increase this if needed
 #define SD_NUM_TRIES 2
 
+#define PRINT_PROFILING_INFO      1
 
 // ESP32 FS Libraries can't handle a trailing slash in the directory name
 #define GIF_DIRECTORY_SD "/gifs"
@@ -48,7 +46,6 @@ const int gifsSizeList[] = { sizeof(rainbow2), sizeof(rainbow1), sizeof(infinity
 int num_files_SD = 0;
 int num_files_LittleFS = 0;
 const int num_files_Memory = sizeof(gifsList) ? sizeof(gifsList)/sizeof(gifsList[0]) : 0;
-
 
 bool useLittleFS = true;
 #ifdef AGIFS_USE_SD
@@ -98,6 +95,27 @@ void agifsSetNextGifIndex(int index, bool switchImmediately) {
   gifIndex = index;
   if(switchImmediately)
     playNextGif = true;
+}
+
+unsigned int currentFrameDelay = 0;
+uint32_t lastFrameDisplayTime = 0;
+
+uint16_t agifsGetCurrentFrameDelay() {
+  return currentFrameDelay;
+}
+
+uint32_t agifsGetNextFrameDisplayTime() {
+  return lastFrameDisplayTime + currentFrameDelay;
+}
+
+uint16_t agifsGetMillisToNextFrameDisplay() {
+  uint32_t now = millis();
+
+  if (((lastFrameDisplayTime + currentFrameDelay) - now) & 0x80000000) { // test the "sign" bit - if true, then next frame display time is in the past
+    return 0;
+  } else {
+    return (lastFrameDisplayTime + currentFrameDelay) - now;
+  }
 }
 
 #ifdef AGIFS_USE_SD
@@ -239,9 +257,9 @@ class AnimatedGifsUsermod : public Usermod {
       // these variables keep track of when it's time to play a new GIF
       static unsigned long displayStartTime_millis;
       
-      // these variables keep track of when we're done displaying the last frame and are ready for a new frame
-      static uint32_t lastFrameDisplayTime = 0;
-      static unsigned int currentFrameDelay = 0;
+      // these are for the optional profiling messages
+      static unsigned long cycleStartTime_millis;
+      static unsigned long loadingDuration_ms;
 
       unsigned long now = millis();
 
@@ -260,7 +278,29 @@ class AnimatedGifsUsermod : public Usermod {
       }
 
       // We only decode a GIF frame if the previous frame delay is over
-      if((millis() - lastFrameDisplayTime) > currentFrameDelay) {
+      if((millis() - lastFrameDisplayTime) >= currentFrameDelay) {
+        // we completed one pass of the GIF, print some stats
+        #if (PRINT_PROFILING_INFO == 1)
+          if(decoder.getCycleNumber() > 0 && decoder.getFrameNumber() == 0) {
+            if(decoder.getCycleNumber() == 1) {
+              Serial.print("loading time: ");
+              Serial.print(loadingDuration_ms);
+              Serial.println("ms");
+            }
+            // Print the stats for this GIF      
+            char buf[80];
+            int32_t frames       = decoder.getFrameCount();
+            int32_t cycle_design = decoder.getCycleTime();  // Intended duration
+            int32_t cycle_actual = now - cycleStartTime_millis;       // Actual duration
+            int32_t percent = 100 * cycle_design / cycle_actual;
+            sprintf(buf, "[%d frames = %dms] actual: %dms speed: %d%%",
+                    frames, cycle_design, cycle_actual, percent);
+            Serial.println(buf);
+
+            cycleStartTime_millis = now;
+          }
+        #endif
+
         if(playNextGif)
         {
           bool fileOpened = false;
@@ -308,6 +348,8 @@ class AnimatedGifsUsermod : public Usermod {
 
               // Calculate time in the future to terminate animation
               displayStartTime_millis = now;          
+
+              loadingDuration_ms = millis() - cycleStartTime_millis;
             }
           }
 

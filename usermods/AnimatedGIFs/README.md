@@ -84,3 +84,14 @@
 
 The intensity slider can be used to select the index of the next GIF.  When the slider changes, the new index is sent to the usermod, and a flag is set to change the gif on the next frame
 
+## Todo
+
+- GIF playing can prevent deleting that file from /edit
+- Deleted files (or added files) can screw up enumeration, force re-enumeration upon
+	- Certain types of file errors
+	- Flag set after LittleFS number of files changes?
+- Disable GIF Decoding when not needed?
+	- Starting a GIF effect can start the decoder
+	- How to disable, after timeout with no request for virtual screen?
+	- Enumerate when the decoder starts?
+
